@@ -14,19 +14,22 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 🔹 Register User
+    // 🔹 REGISTER
     public User register(User user) {
 
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
+        // 🔥 DO NOT TOUCH ROLE HERE
+        // It must already be set from controller
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
     }
 
-    // 🔹 Validate Login
+    // 🔹 LOGIN
     public User authenticate(AuthRequest request) {
 
         User user = userRepository.findByEmail(request.getEmail())
