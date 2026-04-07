@@ -41,7 +41,7 @@ public class AuthController {
 
         AuthResponse res = new AuthResponse();
         res.setToken(token);
-
+ 
         return res;
     }
 }
