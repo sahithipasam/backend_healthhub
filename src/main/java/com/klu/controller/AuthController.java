@@ -2,6 +2,7 @@ package com.klu.controller;
 
 import com.klu.dto.AuthRequest;
 import com.klu.dto.AuthResponse;
+import com.klu.dto.OtpRequest;
 import com.klu.dto.UserDTO;
 import com.klu.entity.Role;
 import com.klu.entity.User;
@@ -18,33 +19,35 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    // 🔹 REGISTER
+    @PostMapping("/send-otp")
+    public String sendOtp(@RequestBody OtpRequest req) {
+        return userService.sendOtp(req.getEmail());
+    }
+
+    @PostMapping("/resend-otp")
+    public String resendOtp(@RequestBody OtpRequest req) {
+        return userService.resendOtp(req.getEmail());
+    }
+
+    @PostMapping("/verify-otp")
+    public String verifyOtp(@RequestBody OtpRequest req) {
+        return userService.verifyOtp(req.getEmail(), req.getOtp());
+    }
+
     @PostMapping("/register")
-    public UserDTO register(@RequestBody UserDTO dto) {
-
+    public String register(@RequestBody UserDTO dto) {
         User user = new User();
-
         user.setName(dto.getName());
         user.setEmail(dto.getEmail());
         user.setPassword(dto.getPassword());
+        user.setRole(Role.valueOf(dto.getRole().toUpperCase()));
 
-        // 🔥 CRITICAL LINE (role comes from frontend)
-        user.setRole(Role.valueOf(dto.getRole()));
-
-        User saved = userService.register(user);
-
-        UserDTO res = new UserDTO();
-        res.setName(saved.getName());
-        res.setEmail(saved.getEmail());
-        res.setRole(saved.getRole().name());
-
-        return res;
+        userService.register(user);
+        return "Account created successfully";
     }
 
-    // 🔹 LOGIN
     @PostMapping("/login")
     public AuthResponse login(@RequestBody AuthRequest req) {
-
         User user = userService.authenticate(req);
 
         String token = jwtUtil.generateToken(
@@ -54,7 +57,6 @@ public class AuthController {
 
         AuthResponse res = new AuthResponse();
         res.setToken(token);
-
         return res;
     }
 }
